@@ -271,6 +271,16 @@ Notifications.popInitialNotification = function(handler) {
 	});
 };
 
+Notifications.areNotificationsEnabled = function(handler) {
+	if ( Platform.OS === 'android' ) {
+		this.callNative('areNotificationsEnabled').then(function(notificationStatus) {
+			handler(notificationStatus)
+		})
+	} else {
+		console.warn('areNotificationsEnabled method is only available on Android')
+	}
+}
+
 Notifications.abandonPermissions = function() {
 	return this.callNative('abandonPermissions', arguments);
 };

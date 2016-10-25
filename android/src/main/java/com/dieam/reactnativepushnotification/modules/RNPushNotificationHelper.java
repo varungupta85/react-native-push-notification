@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import java.lang.reflect.Array;
@@ -410,5 +411,10 @@ public class RNPushNotificationHelper {
             Log.d("RNPushNotification", "Didn't find a notification with " + notificationIDString +
                 " while cancelling a local notification");
         }
+    }
+
+    public boolean areNotificationsEnabled() {
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(mContext);
+        return notificationManagerCompat.areNotificationsEnabled();
     }
 }

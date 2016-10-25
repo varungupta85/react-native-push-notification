@@ -246,4 +246,9 @@ public class RNPushNotification extends ReactContextBaseJavaModule implements Ac
     public void clearAllNotifications() {
         mRNPushNotificationHelper.clearAllNotifications();
     }
+
+    @ReactMethod
+    public void areNotificationsEnabled(Promise promise) {
+        promise.resolve(mRNPushNotificationHelper.areNotificationsEnabled());
+    }
 }

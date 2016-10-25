@@ -26,6 +26,10 @@ NotificationsComponent.prototype.getInitialNotification = function () {
         });
 };
 
+NotificationsComponent.prototype.areNotificationsEnabled = function () {
+	return RNPushNotification.areNotificationsEnabled()
+}
+
 NotificationsComponent.prototype.requestPermissions = function(senderID: string) {
 	RNPushNotification.requestPermissions(senderID);
 };

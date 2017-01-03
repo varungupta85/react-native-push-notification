@@ -48,25 +48,25 @@ public class RNPushNotificationListenerService extends GcmListenerService {
 
         Boolean isRunning = isApplicationRunning();
 
-        Intent intent = new Intent(this.getPackageName() + ".RNPushNotificationReceiveNotification");
-        bundle.putBoolean("foreground", isRunning);
-        bundle.putBoolean("userInteraction", false);
-        intent.putExtra("notification", bundle);
-        sendBroadcast(intent);
-
-        // If contentAvailable is set to true, then send out a remote fetch event
-        if(bundle.getString("contentAvailable", "false").equalsIgnoreCase("true")) {
-            Log.d(bundle.toString(), "Received a notification with remote fetch enabled");
-            Intent remoteFetchIntent = new Intent(this.getPackageName() + ".RNPushNotificationRemoteFetch");
-            remoteFetchIntent.putExtra("notification", bundle);
-            sendBroadcast(remoteFetchIntent);
-        }
-
         if (!isRunning) {
             new RNPushNotificationHelper(getApplication()).sendNotification(bundle);
+            // If contentAvailable is set to true, then send out a remote fetch event
+            if(bundle.getString("contentAvailable", "false").equalsIgnoreCase("true")) {
+                Log.d(bundle.toString(), "Received a notification with remote fetch enabled");
+                Intent remoteFetchIntent = new Intent(this.getPackageName() + ".RNPushNotificationRemoteFetch");
+                remoteFetchIntent.putExtra("notification", bundle);
+                sendBroadcast(remoteFetchIntent);
+            }
+        } else {
+            Intent intent = new Intent(this.getPackageName() + ".RNPushNotificationReceiveNotification");
+            bundle.putBoolean("foreground", true);
+            bundle.putBoolean("userInteraction", false);
+            intent.putExtra("notification", bundle);
+            sendBroadcast(intent);
         }
     }
 
+    // Method copied to RNPushNotificationListenerService. Keep in sync
     private boolean isApplicationRunning() {
         ActivityManager activityManager = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
         List<RunningAppProcessInfo> processInfos = activityManager.getRunningAppProcesses();

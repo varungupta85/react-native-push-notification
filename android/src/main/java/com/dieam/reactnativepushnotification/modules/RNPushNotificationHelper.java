@@ -220,6 +220,7 @@ public class RNPushNotificationHelper {
 
             Intent intent = new Intent(mContext, intentClass);
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            bundle.putBoolean("foreground", false);
             bundle.putBoolean("userInteraction", true);
             intent.putExtra("notification", bundle);
 

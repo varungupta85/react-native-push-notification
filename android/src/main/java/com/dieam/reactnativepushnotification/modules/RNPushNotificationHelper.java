@@ -323,7 +323,7 @@ public class RNPushNotificationHelper {
         }
     }
 
-    private void scheduleNextNotificationIfRepeating(Bundle bundle) {
+    protected void scheduleNextNotificationIfRepeating(Bundle bundle) {
         String repeatType = bundle.getString("repeatType");
         long repeatTime = (long)bundle.getDouble("repeatTime");
 

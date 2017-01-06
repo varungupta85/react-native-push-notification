@@ -18,9 +18,14 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
         int id = intent.getIntExtra(NOTIFICATION_ID, 0);
         long currentTime = System.currentTimeMillis();
         Log.i("RNPushNotification", "NotificationPublisher: Prepare To Publish: " + id + ", Now Time: " + currentTime);
+
+        // If the application is not running, show the notification
+        // Otherwise, just emit the notification received event
         Boolean isRunning = isApplicationRunning(context);
+
+        RNPushNotificationHelper rnPushNotificationHelper = new RNPushNotificationHelper((Application) context.getApplicationContext());
         if(!isRunning) {
-            new RNPushNotificationHelper((Application) context.getApplicationContext()).sendNotification(intent.getExtras());
+            rnPushNotificationHelper.sendNotification(intent.getExtras());
         } else {
             Intent notificationIntent = new Intent(context.getPackageName() + ".RNPushNotificationReceiveNotification");
             Bundle bundle = intent.getExtras();
@@ -28,6 +33,11 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
             bundle.putBoolean("userInteraction", false);
             notificationIntent.putExtra("notification", bundle);
             context.sendBroadcast(notificationIntent);
+
+            // If it is a repeating notification, then schedule
+            // the next occurrence as it is not done automatically
+            // since the repeating API is not exact
+            rnPushNotificationHelper.scheduleNextNotificationIfRepeating(bundle);
         }
     }
 

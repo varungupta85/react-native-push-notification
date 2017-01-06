@@ -46,11 +46,12 @@ public class RNPushNotificationListenerService extends GcmListenerService {
             bundle.putString("id", String.valueOf(randomNumberGenerator.nextInt()));
         }
 
+        // If the application is running, then emit the notification received event
+        // Else, show the notification and emit the remote fetch event
         Boolean isRunning = isApplicationRunning();
 
-        RNPushNotificationHelper rnPushNotificationHelper = new RNPushNotificationHelper(getApplication());
-
         if (!isRunning) {
+            RNPushNotificationHelper rnPushNotificationHelper = new RNPushNotificationHelper(getApplication());
             rnPushNotificationHelper.sendNotification(bundle);
             // If contentAvailable is set to true, then send out a remote fetch event
             if(bundle.getString("contentAvailable", "false").equalsIgnoreCase("true")) {
@@ -65,11 +66,6 @@ public class RNPushNotificationListenerService extends GcmListenerService {
             bundle.putBoolean("userInteraction", false);
             intent.putExtra("notification", bundle);
             sendBroadcast(intent);
-
-            // If it is a repeating notification, then schedule
-            // the next occurrence as it is not done automatically
-            // since the repeating API is not exact
-            rnPushNotificationHelper.scheduleNextNotificationIfRepeating(bundle);
         }
     }
 

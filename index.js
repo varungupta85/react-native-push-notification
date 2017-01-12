@@ -271,6 +271,10 @@ Notifications.popInitialNotification = function(handler) {
 	});
 };
 
+Notifications.getInitialNotification = function() {
+	return this.callNative('getInitialNotification');
+};
+
 Notifications.areNotificationsEnabled = function(handler) {
 	if ( Platform.OS === 'android' ) {
 		this.callNative('areNotificationsEnabled').then(function(notificationStatus) {

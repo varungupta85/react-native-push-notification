@@ -55,7 +55,7 @@ public class RNPushNotificationListenerService extends GcmListenerService {
             rnPushNotificationHelper.sendNotification(bundle);
             // If contentAvailable is set to true, then send out a remote fetch event
             if(bundle.getString("contentAvailable", "false").equalsIgnoreCase("true")) {
-                Log.d(bundle.toString(), "Received a notification with remote fetch enabled");
+                Log.d(RNPushNotification.LOG_TAG, "Received a notification with remote fetch enabled");
                 Intent remoteFetchIntent = new Intent(this.getPackageName() + ".RNPushNotificationRemoteFetch");
                 remoteFetchIntent.putExtra("notification", bundle);
                 sendBroadcast(remoteFetchIntent);
@@ -73,11 +73,13 @@ public class RNPushNotificationListenerService extends GcmListenerService {
     private boolean isApplicationRunning() {
         ActivityManager activityManager = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
         List<RunningAppProcessInfo> processInfos = activityManager.getRunningAppProcesses();
-        for (ActivityManager.RunningAppProcessInfo processInfo : processInfos) {
-            if (processInfo.processName.equals(getApplication().getPackageName())) {
-                if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
-                    for (String d : processInfo.pkgList) {
-                        return true;
+        if(processInfos != null) {
+            for (ActivityManager.RunningAppProcessInfo processInfo : processInfos) {
+                if (processInfo.processName.equals(getApplication().getPackageName())) {
+                    if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                        for (String d : processInfo.pkgList) {
+                            return true;
+                        }
                     }
                 }
             }

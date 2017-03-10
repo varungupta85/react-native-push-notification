@@ -33,6 +33,7 @@ import java.util.Set;
 import android.util.Log;
 
 public class RNPushNotification extends ReactContextBaseJavaModule implements ActivityEventListener {
+    static final String LOG_TAG = "RNPushNotification";
     private RNPushNotificationHelper mRNPushNotificationHelper;
     private final Random mRandomNumberGenerator;
 

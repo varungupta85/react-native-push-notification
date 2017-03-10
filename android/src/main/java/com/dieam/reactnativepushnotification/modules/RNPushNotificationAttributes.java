@@ -116,7 +116,7 @@ public class RNPushNotificationAttributes {
             jsonObject.put("repeatTime", repeatTime);
             jsonObject.put("ongoing", ongoing);
         } catch (JSONException e) {
-            Log.e("RNPushNotification", "Exception while converting RNPushNotificationAttributes to " +
+            Log.e(RNPushNotification.LOG_TAG, "Exception while converting RNPushNotificationAttributes to " +
                     "JSON. Returning an empty object", e);
             return new JSONObject();
         }
@@ -149,7 +149,7 @@ public class RNPushNotificationAttributes {
             repeatTime = jsonObject.has("repeatTime") ? jsonObject.getDouble("repeatTime") : 0.0;
             ongoing = jsonObject.has("ongoing") ? jsonObject.getBoolean("ongoing") : false;
         } catch (JSONException e) {
-            Log.e("RNPushNotification", "Exception while initializing RNPushNotificationAttributes from " +
+            Log.e(RNPushNotification.LOG_TAG, "Exception while initializing RNPushNotificationAttributes from " +
                     "JSON. Some fields may not be set", e);
         }
     }

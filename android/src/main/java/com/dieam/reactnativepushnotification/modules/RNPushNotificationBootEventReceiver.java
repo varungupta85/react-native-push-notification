@@ -45,7 +45,7 @@ public class RNPushNotificationBootEventReceiver extends BroadcastReceiver {
                         }
                     }
                 } catch (Exception e) {
-                    Log.e("RNPushNotification", "SystemBootEventReceiver: onReceive Error: " + e.getMessage());
+                    Log.e(RNPushNotification.LOG_TAG, "SystemBootEventReceiver: onReceive Error: " + e.getMessage());
                 }
             }
         }

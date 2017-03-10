@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -19,18 +20,29 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
         long currentTime = System.currentTimeMillis();
         Log.i("RNPushNotification", "NotificationPublisher: Prepare To Publish: " + id + ", Now Time: " + currentTime);
 
+        // Make sure that the music volume is at least 50% so that the alarm can be heard
+        if(intent.getExtras().getBoolean("ringOnVibrate", true)) {
+            AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+            int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+            int halfMaxVolume = maxVolume / 2;
+            if (currentVolume < halfMaxVolume) {
+                Log.d(RNPushNotification.LOG_TAG, "Increasing phone music volume");
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, halfMaxVolume, 0);
+            }
+        }
+
         // If the application is not running, show the notification
         // Otherwise, just emit the notification received event
         Boolean isRunning = isApplicationRunning(context);
 
         RNPushNotificationHelper rnPushNotificationHelper = new RNPushNotificationHelper((Application) context.getApplicationContext());
         if(!isRunning) {
-            rnPushNotificationHelper.sendNotification(intent.getExtras());
+            rnPushNotificationHelper.showNotification(intent.getExtras());
         } else {
             Intent notificationIntent = new Intent(context.getPackageName() + ".RNPushNotificationReceiveNotification");
             Bundle bundle = intent.getExtras();
             bundle.putBoolean("foreground", true);
-            bundle.putBoolean("userInteraction", false);
             notificationIntent.putExtra("notification", bundle);
             context.sendBroadcast(notificationIntent);
 
@@ -45,11 +57,13 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
     private boolean isApplicationRunning(Context context) {
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningAppProcessInfo> processInfos = activityManager.getRunningAppProcesses();
-        for (ActivityManager.RunningAppProcessInfo processInfo : processInfos) {
-            if (processInfo.processName.equals(context.getPackageName())) {
-                if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
-                    for (String d : processInfo.pkgList) {
-                        return true;
+        if(processInfos != null) {
+            for (ActivityManager.RunningAppProcessInfo processInfo : processInfos) {
+                if (processInfo.processName.equals(context.getPackageName())) {
+                    if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                        for (String d : processInfo.pkgList) {
+                            return true;
+                        }
                     }
                 }
             }

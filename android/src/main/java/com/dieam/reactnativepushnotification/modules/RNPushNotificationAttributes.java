@@ -21,7 +21,6 @@ public class RNPushNotificationAttributes {
     private String sound;
     private String color;
     private String group;
-    private boolean userInteraction;
     private boolean playSound;
     private boolean vibrate;
     private double vibration;
@@ -51,7 +50,6 @@ public class RNPushNotificationAttributes {
         bundle.putString("sound", sound);
         bundle.putString("color", color);
         bundle.putString("group", group);
-        bundle.putBoolean("userInteraction", userInteraction);
         bundle.putBoolean("playSound", playSound);
         bundle.putBoolean("vibrate", vibrate);
         bundle.putDouble("vibration", vibration);
@@ -78,7 +76,6 @@ public class RNPushNotificationAttributes {
         sound = bundle.getString("sound");
         color = bundle.getString("color");
         group = bundle.getString("group");
-        userInteraction = bundle.getBoolean("userInteraction");
         playSound = bundle.getBoolean("playSound");
         vibrate = bundle.getBoolean("vibrate");
         vibration = bundle.getDouble("vibration");
@@ -106,7 +103,6 @@ public class RNPushNotificationAttributes {
             jsonObject.put("sound", sound);
             jsonObject.put("color", color);
             jsonObject.put("group", group);
-            jsonObject.put("userInteraction", userInteraction);
             jsonObject.put("playSound", playSound);
             jsonObject.put("vibrate", vibrate);
             jsonObject.put("vibration", vibration);
@@ -139,7 +135,6 @@ public class RNPushNotificationAttributes {
             sound = jsonObject.has("sound") ? jsonObject.getString("sound") : null;
             color = jsonObject.has("color") ? jsonObject.getString("color") : null;
             group = jsonObject.has("group") ? jsonObject.getString("group") : null;
-            userInteraction = jsonObject.has("userInteraction") ? jsonObject.getBoolean("userInteraction") : false;
             playSound = jsonObject.has("playSound") ? jsonObject.getBoolean("playSound") : true;
             vibrate = jsonObject.has("vibrate") ? jsonObject.getBoolean("vibrate") : true;
             vibration = jsonObject.has("vibration") ? jsonObject.getDouble("vibration") : 1000;
@@ -172,7 +167,6 @@ public class RNPushNotificationAttributes {
                 ", sound='" + sound + '\'' +
                 ", color='" + color + '\'' +
                 ", group='" + group + '\'' +
-                ", userInteraction=" + userInteraction +
                 ", playSound=" + playSound +
                 ", vibrate=" + vibrate +
                 ", vibration=" + vibration +
@@ -238,10 +232,6 @@ public class RNPushNotificationAttributes {
 
     public String getGroup() {
         return group;
-    }
-
-    public boolean isUserInteraction() {
-        return userInteraction;
     }
 
     public boolean isPlaySound() {

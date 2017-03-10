@@ -186,7 +186,6 @@ Notifications._onNotification = function(data, isFromBackground = null) {
 		if ( Platform.OS === 'ios' ) {
 			this.onNotification({
 				foreground: ! isFromBackground,
-				userInteraction: isFromBackground,
 				message: data.getMessage(),
 				data: data.getData(),
 				badge: data.getBadgeCount(),

@@ -10,10 +10,12 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -67,23 +69,23 @@ public class RNPushNotificationHelper {
     public void sendNotificationScheduled(Bundle bundle) {
         Class intentClass = getMainActivityClass();
         if (intentClass == null) {
-            Log.e("RNPushNotification", "No activity class found for the notification");
+            Log.e(RNPushNotification.LOG_TAG, "No activity class found for the notification");
             return;
         }
 
         if (bundle.getString("message") == null) {
-            Log.e("RNPushNotification", "No message specified for the notification");
+            Log.e(RNPushNotification.LOG_TAG, "No message specified for the notification");
             return;
         }
 
         if(bundle.getString("id") == null) {
-            Log.e("RNPushNotification", "No notification ID specified for the notification");
+            Log.e(RNPushNotification.LOG_TAG, "No notification ID specified for the notification");
             return;
         }
 
         double fireDate = bundle.getDouble("fireDate");
         if (fireDate == 0) {
-            Log.e("RNPushNotification", "No date specified for the scheduled notification");
+            Log.e(RNPushNotification.LOG_TAG, "No date specified for the scheduled notification");
             return;
         }
 
@@ -99,7 +101,7 @@ public class RNPushNotificationHelper {
         // notification to the user
         PendingIntent pendingIntent = getScheduleNotificationIntent(bundle);
 
-        Log.d("RNPushNotification", String.format("Setting a notification with id %s at time %s",
+        Log.d(RNPushNotification.LOG_TAG, String.format("Setting a notification with id %s at time %s",
             bundle.getString("id"), Long.toString(fireDate)));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             getAlarmManager().setExact(AlarmManager.RTC_WAKEUP, fireDate, pendingIntent);
@@ -124,21 +126,62 @@ public class RNPushNotificationHelper {
         }
     }
 
+    public void showNotification(Bundle bundle) {
+        Class intentClass = getMainActivityClass();
+        if (intentClass == null) {
+            Log.e(RNPushNotification.LOG_TAG, "No activity class found for the notification");
+            return;
+        }
+
+        PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        boolean isScreenAwake = (Build.VERSION.SDK_INT < 20 ? powerManager.isScreenOn():powerManager.isInteractive());
+
+        // If screen is locked, show a local notification as well
+        if(!isScreenAwake) {
+            Log.d(RNPushNotification.LOG_TAG, "Showing notification also because screen is not awake");
+            this.sendNotificationCore(bundle);
+        }
+
+        Intent bringToForegroundIntent = new Intent(mContext, intentClass);
+        bringToForegroundIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        mContext.startActivity(bringToForegroundIntent);
+
+        Intent notificationIntent = new Intent(mContext.getPackageName() + ".RNPushNotificationReceiveNotification");
+        bundle.putBoolean("foreground", true);
+        notificationIntent.putExtra("notification", bundle);
+        mContext.sendBroadcast(notificationIntent);
+
+        // If it is a repeating notification, then schedule
+        // the next occurrence as it is not done automatically
+        // since the repeating API is not exact
+        this.scheduleNextNotificationIfRepeating(bundle);
+    }
+
     public void sendNotification(Bundle bundle) {
+        this.sendNotificationCore(bundle);
+
+        // Can't use setRepeating for recurring notifications because setRepeating
+        // is inexact by default starting API 19 and the notifications are not fired
+        // at the exact time. During testing, it was found that notifications could
+        // late by many minutes.
+        this.scheduleNextNotificationIfRepeating(bundle);
+    }
+
+    public void sendNotificationCore(Bundle bundle) {
         try {
             Class intentClass = getMainActivityClass();
             if (intentClass == null) {
-                Log.e("RNPushNotification", "No activity class found for the notification");
+                Log.e(RNPushNotification.LOG_TAG, "No activity class found for the notification");
                 return;
             }
 
             if (bundle.getString("message") == null) {
-                Log.e("RNPushNotification", "No message specified for the notification");
+                Log.e(RNPushNotification.LOG_TAG, "No message specified for the notification");
                 return;
             }
 
             if(bundle.getString("id") == null) {
-                Log.e("RNPushNotification", "No notification ID specified for the notification");
+                Log.e(RNPushNotification.LOG_TAG, "No notification ID specified for the notification");
                 return;
             }
 
@@ -221,7 +264,6 @@ public class RNPushNotificationHelper {
             Intent intent = new Intent(mContext, intentClass);
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             bundle.putBoolean("foreground", false);
-            bundle.putBoolean("userInteraction", true);
             intent.putExtra("notification", bundle);
 
             if (!bundle.containsKey("playSound") || bundle.getBoolean("playSound")) {
@@ -269,7 +311,7 @@ public class RNPushNotificationHelper {
             try {
                 actionsArray = bundle.getString("actions") != null ? new JSONArray(bundle.getString("actions")) : null;
             } catch (JSONException e) {
-                Log.e("RNPushNotification", "Exception while converting actions to JSON object.", e);
+                Log.e(RNPushNotification.LOG_TAG, "Exception while converting actions to JSON object.", e);
             }
 
             if (actionsArray != null) {
@@ -282,7 +324,7 @@ public class RNPushNotificationHelper {
                     try {
                         action = actionsArray.getString(i);
                     } catch (JSONException e) {
-                        Log.e("RNPushNotification", "Exception while getting action from actionsArray.", e);
+                        Log.e(RNPushNotification.LOG_TAG, "Exception while getting action from actionsArray.", e);
                         continue;
                     }
 
@@ -312,14 +354,8 @@ public class RNPushNotificationHelper {
             } else {
                 notificationManager.notify(notificationID, info);
             }
-
-            // Can't use setRepeating for recurring notifications because setRepeating
-            // is inexact by default starting API 19 and the notifications are not fired
-            // at the exact time. During testing, it was found that notifications could
-            // late by many minutes.
-            this.scheduleNextNotificationIfRepeating(bundle);
         } catch (Exception e) {
-            Log.e(TAG, "failed to send push notification", e);
+            Log.e(RNPushNotification.LOG_TAG, "failed to send push notification", e);
         }
     }
 
@@ -367,7 +403,7 @@ public class RNPushNotificationHelper {
 
             // Sanity check, should never happen
             if(newFireDate != 0) {
-                Log.d("RNPushNotification", String.format("Repeating notification with id %s at time %s",
+                Log.d(RNPushNotification.LOG_TAG, String.format("Repeating notification with id %s at time %s",
                         bundle.getString("id"), Long.toString(newFireDate)));
                 bundle.putDouble("fireDate", newFireDate);
                 this.sendNotificationScheduled(bundle);
@@ -394,7 +430,7 @@ public class RNPushNotificationHelper {
     public void cancelNotification(String notificationIDString) {
         // Sanity check. Only delete if it has been scheduled
         if (mSharedPreferences.contains(notificationIDString)) {
-            Log.d("RNPushNotification", "Cancelling notification with ID " + notificationIDString);
+            Log.d(RNPushNotification.LOG_TAG, "Cancelling notification with ID " + notificationIDString);
 
             NotificationManager notificationManager =
                     (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -409,7 +445,7 @@ public class RNPushNotificationHelper {
             editor.remove(notificationIDString);
             commitPreferences(editor);
         } else {
-            Log.d("RNPushNotification", "Didn't find a notification with " + notificationIDString +
+            Log.d(RNPushNotification.LOG_TAG, "Didn't find a notification with " + notificationIDString +
                 " while cancelling a local notification");
         }
     }

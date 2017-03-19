@@ -127,39 +127,10 @@ public class RNPushNotification extends ReactContextBaseJavaModule implements Ac
         sendEvent("remoteNotificationReceived", params);
     }
 
-    private void registerNotificationsReceiveNotificationActions(ReadableArray actions) {
-        IntentFilter intentFilter = new IntentFilter();
-        // Add filter for each actions.
-        for (int i=0; i<actions.size(); i++) {
-            String action = actions.getString(i);
-            intentFilter.addAction(getReactApplicationContext().getPackageName() + "." + action);
-        }
-        getReactApplicationContext().registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Bundle bundle = intent.getBundleExtra("notification");
-
-                // Notify the action.
-                notifyNotificationAction(bundle);
-
-                // Dismiss the notification popup.
-                NotificationManager manager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
-                int notificationID = Integer.parseInt(bundle.getString("id"));
-                manager.cancel(notificationID);
-            }
-        }, intentFilter);
-    }
-
-    private void notifyNotificationAction(Bundle bundle) {
-        String bundleString = convertJSON(bundle);
-
-        WritableMap params = Arguments.createMap();
-        params.putString("dataJSON", bundleString);
-
-        sendEvent("notificationActionReceived", params);
-    }
-
     private String convertJSON(Bundle bundle) {
+        if(bundle == null) {
+            bundle = new Bundle();
+        }
         JSONObject json = new JSONObject();
         Set<String> keys = bundle.keySet();
         for (String key : keys) {
@@ -236,11 +207,6 @@ public class RNPushNotification extends ReactContextBaseJavaModule implements Ac
     public void cancelLocalNotifications(ReadableMap details) {
         String notificationIdString = details.getString("id");
         mRNPushNotificationHelper.cancelNotification(notificationIdString);
-    }
-
-    @ReactMethod
-    public void registerNotificationActions(ReadableArray actions) {
-        registerNotificationsReceiveNotificationActions(actions);
     }
 
     @ReactMethod

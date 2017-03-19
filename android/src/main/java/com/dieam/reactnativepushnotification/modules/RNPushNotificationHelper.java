@@ -329,7 +329,7 @@ public class RNPushNotificationHelper {
                     }
 
                     Intent actionIntent = new Intent();
-                    actionIntent.setAction(mContext.getPackageName() + "." + action);
+                    actionIntent.setAction("RNPushNotificationAction");
                     // Add "action" for later identifying which button gets pressed.
                     bundle.putString("action", action);
                     actionIntent.putExtra("notification", bundle);

@@ -97,10 +97,6 @@ NotificationsComponent.prototype.removeEventListener = function(type: string, ha
 	_notifHandlers.delete(handler);
 }
 
-NotificationsComponent.prototype.registerNotificationActions = function(details: Object) {
-	RNPushNotification.registerNotificationActions(details);
-}
-
 NotificationsComponent.prototype.clearAllNotifications = function() {
 	RNPushNotification.clearAllNotifications()
 }

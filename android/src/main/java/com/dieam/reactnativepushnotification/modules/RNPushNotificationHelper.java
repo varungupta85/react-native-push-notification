@@ -139,15 +139,20 @@ public class RNPushNotificationHelper {
         // If screen is locked, show a local notification as well
         if(!isScreenAwake) {
             Log.d(RNPushNotification.LOG_TAG, "Showing notification also because screen is not awake");
+            // Don't play the sound because the sound is played by the in app alarm action
+            bundle.putBoolean("playSound", false);
             this.sendNotificationCore(bundle);
         }
 
+        // Set foreground as true such that the alarm sound is played
+        bundle.putBoolean("foreground", true);
+
         Intent bringToForegroundIntent = new Intent(mContext, intentClass);
+        bringToForegroundIntent.putExtra("notification", bundle);
         bringToForegroundIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
         mContext.startActivity(bringToForegroundIntent);
 
         Intent notificationIntent = new Intent(mContext.getPackageName() + ".RNPushNotificationReceiveNotification");
-        bundle.putBoolean("foreground", true);
         notificationIntent.putExtra("notification", bundle);
         mContext.sendBroadcast(notificationIntent);
 

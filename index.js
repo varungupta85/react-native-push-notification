@@ -82,7 +82,7 @@ Notifications.configure = function(options: Object) {
 		this.callNative( 'addEventListener', [ 'register', this._onRegister ] );
 		this.callNative( 'addEventListener', [ 'notification', this._onNotification ] );
 		this.callNative( 'addEventListener', [ 'localNotification', this._onNotification ] );
-		Platform.OS === 'android' ? this.callNative( 'addEventListener', [ 'remoteFetch', this._onRemoteFetch ] ) : null
+		Platform.OS === 'android' && this.callNative( 'addEventListener', [ 'remoteFetch', this._onRemoteFetch ] )
 
 		if ( typeof options.popInitialNotification === 'undefined' ||
 			 options.popInitialNotification === true ) {
@@ -107,7 +107,7 @@ Notifications.unregister = function() {
 	this.callNative( 'removeEventListener', [ 'register', this._onRegister ] )
 	this.callNative( 'removeEventListener', [ 'notification', this._onNotification ] )
 	this.callNative( 'removeEventListener', [ 'localNotification', this._onNotification ] )
-	Platform.OS === 'android' ? this.callNative( 'removeEventListener', [ 'remoteFetch', this._onRemoteFetch ] ) : null
+	Platform.OS === 'android' && this.callNative( 'removeEventListener', [ 'remoteFetch', this._onRemoteFetch ] )
 };
 
 /**

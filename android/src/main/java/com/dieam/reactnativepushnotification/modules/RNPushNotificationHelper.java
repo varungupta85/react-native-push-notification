@@ -115,15 +115,7 @@ public class RNPushNotificationHelper {
         notificationAttributes.fromBundle(bundle);
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString(notificationAttributes.getId(), notificationAttributes.toJson().toString());
-        commitPreferences(editor);
-    }
-
-    private void commitPreferences(SharedPreferences.Editor editor) {
-        if (Build.VERSION.SDK_INT < 9) {
-            editor.commit();
-        } else {
-            editor.apply();
-        }
+        editor.apply();
     }
 
     public void showNotification(Bundle bundle) {
@@ -132,6 +124,12 @@ public class RNPushNotificationHelper {
             Log.e(RNPushNotification.LOG_TAG, "No activity class found for the notification");
             return;
         }
+
+        if(bundle.getString("id") == null) {
+            Log.e(RNPushNotification.LOG_TAG, "No notification ID specified for the notification");
+            return;
+        }
+        int notificationID = Integer.parseInt(bundle.getString("id"));
 
         PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
         boolean isScreenAwake = (Build.VERSION.SDK_INT < 20 ? powerManager.isScreenOn():powerManager.isInteractive());
@@ -142,6 +140,14 @@ public class RNPushNotificationHelper {
             // Don't play the sound because the sound is played by the in app alarm action
             bundle.putBoolean("playSound", false);
             this.sendNotificationCore(bundle);
+        } else {
+            // Remove the notification from preferences so that it doesn't appear again on reboot.
+            // If it is a repeating notification, it will be rescheduled
+            if(mSharedPreferences.getString(Integer.toString(notificationID), null) != null) {
+                SharedPreferences.Editor editor = mSharedPreferences.edit();
+                editor.remove(Integer.toString(notificationID));
+                editor.apply();
+            }
         }
 
         // Set foreground as true such that the alarm sound is played
@@ -349,7 +355,7 @@ public class RNPushNotificationHelper {
             if(mSharedPreferences.getString(Integer.toString(notificationID), null) != null) {
                 SharedPreferences.Editor editor = mSharedPreferences.edit();
                 editor.remove(Integer.toString(notificationID));
-                commitPreferences(editor);
+                editor.apply();
             }
 
             if (bundle.containsKey("tag")) {
@@ -447,7 +453,7 @@ public class RNPushNotificationHelper {
 
             SharedPreferences.Editor editor = mSharedPreferences.edit();
             editor.remove(notificationIDString);
-            commitPreferences(editor);
+            editor.apply();
         } else {
             Log.d(RNPushNotification.LOG_TAG, "Didn't find a notification with " + notificationIDString +
                 " while cancelling a local notification");
@@ -457,5 +463,9 @@ public class RNPushNotificationHelper {
     public boolean areNotificationsEnabled() {
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(mContext);
         return notificationManagerCompat.areNotificationsEnabled();
+    }
+
+    public SharedPreferences getSharedPreferences() {
+        return mSharedPreferences;
     }
 }

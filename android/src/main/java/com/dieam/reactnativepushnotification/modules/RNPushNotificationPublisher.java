@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,6 +46,14 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
             bundle.putBoolean("foreground", true);
             notificationIntent.putExtra("notification", bundle);
             context.sendBroadcast(notificationIntent);
+
+            // Remove the notification from the scheduled preferences so that it is not shown again
+            // when the phone is rebooted
+            if(rnPushNotificationHelper.getSharedPreferences().getString(Integer.toString(id), null) != null) {
+                SharedPreferences.Editor editor = rnPushNotificationHelper.getSharedPreferences().edit();
+                editor.remove(Integer.toString(id));
+                editor.apply();
+            }
 
             // If it is a repeating notification, then schedule
             // the next occurrence as it is not done automatically

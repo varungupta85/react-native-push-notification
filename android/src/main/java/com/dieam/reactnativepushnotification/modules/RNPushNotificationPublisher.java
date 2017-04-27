@@ -21,18 +21,6 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
         long currentTime = System.currentTimeMillis();
         Log.i("RNPushNotification", "NotificationPublisher: Prepare To Publish: " + id + ", Now Time: " + currentTime);
 
-        // Make sure that the music volume is at least 50% so that the alarm can be heard
-        if(intent.getExtras().getBoolean("ringOnVibrate", true)) {
-            AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-            int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-            int halfMaxVolume = maxVolume / 2;
-            if (currentVolume < halfMaxVolume) {
-                Log.d(RNPushNotification.LOG_TAG, "Increasing phone music volume");
-                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, halfMaxVolume, 0);
-            }
-        }
-
         // If the application is not running, show the notification
         // Otherwise, just emit the notification received event
         Boolean isRunning = isApplicationRunning(context);

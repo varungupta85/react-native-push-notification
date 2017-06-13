@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -52,6 +53,10 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
 
     // Method copied from RNPushNotificationListenerService. Keep in sync
     private boolean isApplicationRunning(Context context) {
+        if(Build.VERSION.SDK_INT < 21){
+            return this.appInForegroundForOldApi(context);
+        }
+
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningAppProcessInfo> processInfos = activityManager.getRunningAppProcesses();
         if(processInfos != null) {
@@ -66,5 +71,11 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
             }
         }
         return false;
+    }
+
+    private boolean appInForegroundForOldApi(Context context) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        String mm=(manager.getRunningTasks(1).get(0)).topActivity.getPackageName();
+        return (mm.equals(context.getPackageName()));
     }
 }

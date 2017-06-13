@@ -1,6 +1,7 @@
 package com.dieam.reactnativepushnotification.modules;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -68,13 +69,17 @@ public class RNPushNotificationListenerService extends GcmListenerService {
         }
     }
 
-    // Method copied to RNPushNotificationListenerService. Keep in sync
+    // Method copied to RNPushNotificationPublisher. Keep in sync
     private boolean isApplicationRunning() {
+        if(Build.VERSION.SDK_INT < 21){
+            return this.appInForegroundForOldApi();
+        }
+
         ActivityManager activityManager = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
         List<RunningAppProcessInfo> processInfos = activityManager.getRunningAppProcesses();
         if(processInfos != null) {
             for (ActivityManager.RunningAppProcessInfo processInfo : processInfos) {
-                if (processInfo.processName.equals(getApplication().getPackageName())) {
+                if (processInfo.processName.equals(this.getApplication().getPackageName())) {
                     if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
                         for (String d : processInfo.pkgList) {
                             return true;
@@ -84,5 +89,11 @@ public class RNPushNotificationListenerService extends GcmListenerService {
             }
         }
         return false;
+    }
+
+    private boolean appInForegroundForOldApi() {
+        ActivityManager manager = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
+        String mm=(manager.getRunningTasks(1).get(0)).topActivity.getPackageName();
+        return (mm.equals(this.getApplication().getPackageName()));
     }
 }

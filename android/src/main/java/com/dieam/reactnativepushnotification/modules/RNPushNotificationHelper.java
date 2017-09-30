@@ -139,6 +139,8 @@ public class RNPushNotificationHelper {
         // If screen is locked, show a local notification as well
         if(!isScreenAwake) {
             Log.d(RNPushNotification.LOG_TAG, "Showing notification also because screen is not awake");
+            PowerManager.WakeLock wl = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.ON_AFTER_RELEASE, "Galarm");
+            wl.acquire(10000);
             // Don't play the sound because the sound is played by the in app alarm action
             bundle.putBoolean("playSound", false);
             this.sendNotificationCore(bundle);

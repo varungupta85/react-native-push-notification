@@ -25,7 +25,9 @@ public class RNPushNotificationBootEventReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Log.i("RNPushNotification", "RNPushNotificationBootEventReceiver: Setting system alarms");
         
-        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED") 
+            || intent.getAction().equals("android.intent.action.QUICKBOOT_POWERON") 
+            || intent.getAction().equals("com.htc.intent.action.QUICKBOOT_POWERON")) {
             SharedPreferences appSharedPreferences = context.getSharedPreferences(context.getApplicationContext().getPackageName(), Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = appSharedPreferences.edit();
             editor.remove("appHasRun");

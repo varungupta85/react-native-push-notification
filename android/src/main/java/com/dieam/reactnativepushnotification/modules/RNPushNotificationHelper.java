@@ -143,6 +143,7 @@ public class RNPushNotificationHelper {
             wl.acquire(10000);
             // Don't play the sound because the sound is played by the in app alarm action
             bundle.putBoolean("playSound", false);
+            bundle.putBoolean("vibrate", false);
             this.sendNotificationCore(bundle);
         } else {
             // Remove the notification from preferences so that it doesn't appear again on reboot.

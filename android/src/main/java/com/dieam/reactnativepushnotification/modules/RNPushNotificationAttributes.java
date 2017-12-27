@@ -67,7 +67,7 @@ public class RNPushNotificationAttributes {
         fireDate = bundle.getDouble("fireDate");
         title = bundle.getString("title");
         ticker = bundle.getString("ticker");
-        autoCancel = bundle.getBoolean("autoCancel");
+        autoCancel = bundle.getBoolean("autoCancel", true);
         largeIcon = bundle.getString("largeIcon");
         smallIcon = bundle.getString("smallIcon");
         bigText = bundle.getString("bigText");
@@ -76,8 +76,8 @@ public class RNPushNotificationAttributes {
         sound = bundle.getString("sound");
         color = bundle.getString("color");
         group = bundle.getString("group");
-        playSound = bundle.getBoolean("playSound");
-        vibrate = bundle.getBoolean("vibrate");
+        playSound = bundle.getBoolean("playSound", true);
+        vibrate = bundle.getBoolean("vibrate", true);
         vibration = bundle.getDouble("vibration");
         actions = bundle.getString("actions");
         tag = bundle.getString("tag");

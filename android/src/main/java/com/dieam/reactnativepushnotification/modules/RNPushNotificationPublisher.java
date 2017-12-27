@@ -24,10 +24,12 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
 
         // If the application is not running, show the notification
         // Otherwise, just emit the notification received event
-        Boolean isRunning = isApplicationRunning(context);
-
+        Boolean isRunningInForeground = isApplicationRunning(context);
+        Boolean isRunningAtAll = isApplicationRunningAtAll(context);
         RNPushNotificationHelper rnPushNotificationHelper = new RNPushNotificationHelper((Application) context.getApplicationContext());
-        if(!isRunning) {
+        if(!isRunningAtAll) {
+            rnPushNotificationHelper.sendNotification(intent.getExtras());
+        } else if(!isRunningInForeground) {
             rnPushNotificationHelper.showNotification(intent.getExtras());
         } else {
             Intent notificationIntent = new Intent(context.getPackageName() + ".RNPushNotificationReceiveNotification");
@@ -77,5 +79,10 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         String mm=(manager.getRunningTasks(1).get(0)).topActivity.getPackageName();
         return (mm.equals(context.getPackageName()));
+    }
+
+    private boolean isApplicationRunningAtAll(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getApplicationContext().getPackageName(), Context.MODE_PRIVATE);
+        return sharedPreferences.contains("appHasRun");
     }
 }

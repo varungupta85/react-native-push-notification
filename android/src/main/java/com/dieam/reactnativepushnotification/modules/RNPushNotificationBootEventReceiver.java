@@ -1,13 +1,16 @@
 package com.dieam.reactnativepushnotification.modules;
 
+import android.app.ActivityManager;
 import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import java.util.List;
 import java.util.Set;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -21,8 +24,13 @@ public class RNPushNotificationBootEventReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.i("RNPushNotification", "RNPushNotificationBootEventReceiver: Setting system alarms");
-
+        
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+            SharedPreferences appSharedPreferences = context.getSharedPreferences(context.getApplicationContext().getPackageName(), Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = appSharedPreferences.edit();
+            editor.remove("appHasRun");
+            editor.apply();
+
             SharedPreferences sharedPreferences = context.getSharedPreferences(RNPushNotificationHelper.PREFERENCES_KEY, Context.MODE_PRIVATE);
             Set<String> ids = sharedPreferences.getAll().keySet();
             RNPushNotificationHelper rnPushNotificationHelper = new RNPushNotificationHelper((Application)context.getApplicationContext());

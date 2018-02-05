@@ -135,12 +135,17 @@ public class RNPushNotificationHelper {
 
         PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
         boolean isScreenAwake = (Build.VERSION.SDK_INT < 20 ? powerManager.isScreenOn():powerManager.isInteractive());
+        KeyguardManager myKM = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        boolean isScreenLocked = myKM.inKeyguardRestrictedInputMode();
 
-        // If screen is locked, show a local notification as well
+        // If screen is not awake, wake it up
         if(!isScreenAwake) {
-            Log.d(RNPushNotification.LOG_TAG, "Showing notification also because screen is not awake");
             PowerManager.WakeLock wl = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.ON_AFTER_RELEASE, "Galarm");
             wl.acquire(10000);
+        }
+        // If screen is locked, show a local notification as well
+        if(isScreenLocked) {
+            Log.d(RNPushNotification.LOG_TAG, "Showing notification also because screen is locked");
             // Don't play the sound because the sound is played by the in app alarm action
             bundle.putBoolean("playSound", false);
             bundle.putBoolean("vibrate", false);

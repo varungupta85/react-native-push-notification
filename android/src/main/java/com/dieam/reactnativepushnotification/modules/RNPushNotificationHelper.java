@@ -360,7 +360,7 @@ public class RNPushNotificationHelper {
                         newFireDate = newFireDate + msecInAMinute;
                         break;
                 }
-            } while (newFireDate < currDate)
+            } while (newFireDate < currDate);
 
             // Sanity check, should never happen
             if (newFireDate > currDate) {

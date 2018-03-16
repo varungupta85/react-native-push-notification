@@ -120,64 +120,6 @@ public class RNPushNotificationHelper {
         editor.apply();
     }
 
-    public void showNotification(Bundle bundle) {
-        Class intentClass = getMainActivityClass();
-        if (intentClass == null) {
-            Log.e(RNPushNotification.LOG_TAG, "No activity class found for the notification");
-            return;
-        }
-
-        if(bundle.getString("id") == null) {
-            Log.e(RNPushNotification.LOG_TAG, "No notification ID specified for the notification");
-            return;
-        }
-        int notificationID = Integer.parseInt(bundle.getString("id"));
-
-        PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
-        boolean isScreenAwake = (Build.VERSION.SDK_INT < 20 ? powerManager.isScreenOn():powerManager.isInteractive());
-        KeyguardManager myKM = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-        boolean isScreenLocked = myKM.inKeyguardRestrictedInputMode();
-
-        // If screen is not awake, wake it up
-        if(!isScreenAwake) {
-            PowerManager.WakeLock wl = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.ON_AFTER_RELEASE, "Galarm");
-            wl.acquire(10000);
-        }
-        // If screen is locked, show a local notification as well
-        if(isScreenLocked) {
-            Log.d(RNPushNotification.LOG_TAG, "Showing notification also because screen is locked");
-            // Don't play the sound because the sound is played by the in app alarm action
-            bundle.putBoolean("playSound", false);
-            bundle.putBoolean("vibrate", false);
-            this.sendNotificationCore(bundle);
-        } else {
-            // Remove the notification from preferences so that it doesn't appear again on reboot.
-            // If it is a repeating notification, it will be rescheduled
-            if(mSharedPreferences.getString(Integer.toString(notificationID), null) != null) {
-                SharedPreferences.Editor editor = mSharedPreferences.edit();
-                editor.remove(Integer.toString(notificationID));
-                editor.apply();
-            }
-        }
-
-        // Set foreground as true such that the alarm sound is played
-        bundle.putBoolean("foreground", true);
-
-        Intent bringToForegroundIntent = new Intent(mContext, intentClass);
-        bringToForegroundIntent.putExtra("notification", bundle);
-        bringToForegroundIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        mContext.startActivity(bringToForegroundIntent);
-
-        Intent notificationIntent = new Intent(mContext.getPackageName() + ".RNPushNotificationReceiveNotification");
-        notificationIntent.putExtra("notification", bundle);
-        mContext.sendBroadcast(notificationIntent);
-
-        // If it is a repeating notification, then schedule
-        // the next occurrence as it is not done automatically
-        // since the repeating API is not exact
-        this.scheduleNextNotificationIfRepeating(bundle);
-    }
-
     public void sendNotification(Bundle bundle) {
         this.sendNotificationCore(bundle);
 
@@ -381,12 +323,12 @@ public class RNPushNotificationHelper {
 
     protected void scheduleNextNotificationIfRepeating(Bundle bundle) {
         String repeatType = bundle.getString("repeatType");
-        long repeatTime = (long)bundle.getDouble("repeatTime");
-
-        if(repeatType != null) {
-            long fireDate = (long)bundle.getDouble("fireDate");
-            int msecInAMinute = 60000;
-
+        long repeatTime = (long) bundle.getDouble("repeatTime");
+        long fireDate = (long) bundle.getDouble("fireDate");
+        long newFireDate = fireDate;
+        long currDate = System.currentTimeMillis();
+        int msecInAMinute = 60000;
+        if (repeatType != null) {
             boolean validRepeatType = Arrays.asList("time", "week", "day", "hour", "minute").contains(repeatType);
 
             // Sanity checks
@@ -400,29 +342,28 @@ public class RNPushNotificationHelper {
                         "has been mentioned");
                 return;
             }
-
-            long newFireDate = 0;
-
-            switch (repeatType) {
-                case "time" :
-                    newFireDate = fireDate + repeatTime;
-                    break;
-                case "week":
-                    newFireDate = fireDate + 7 * 24 * 60 * msecInAMinute;
-                    break;
-                case "day":
-                    newFireDate = fireDate + 24 * 60 * msecInAMinute;
-                    break;
-                case "hour":
-                    newFireDate = fireDate + 60 * msecInAMinute;
-                    break;
-                case "minute":
-                    newFireDate = fireDate + msecInAMinute;
-                    break;
-            }
+            do {
+                switch (repeatType) {
+                    case "time":
+                        newFireDate = newFireDate + repeatTime;
+                        break;
+                    case "week":
+                        newFireDate = newFireDate + 7 * 24 * 60 * msecInAMinute;
+                        break;
+                    case "day":
+                        newFireDate = newFireDate + 24 * 60 * msecInAMinute;
+                        break;
+                    case "hour":
+                        newFireDate = newFireDate + 60 * msecInAMinute;
+                        break;
+                    case "minute":
+                        newFireDate = newFireDate + msecInAMinute;
+                        break;
+                }
+            } while (newFireDate < currDate)
 
             // Sanity check, should never happen
-            if(newFireDate != 0) {
+            if (newFireDate > currDate) {
                 Log.d(RNPushNotification.LOG_TAG, String.format("Repeating notification with id %s at time %s",
                         bundle.getString("id"), Long.toString(newFireDate)));
                 bundle.putDouble("fireDate", newFireDate);

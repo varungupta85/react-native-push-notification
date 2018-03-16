@@ -28,10 +28,6 @@ public class RNPushNotificationBootEventReceiver extends BroadcastReceiver {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED") 
             || intent.getAction().equals("android.intent.action.QUICKBOOT_POWERON") 
             || intent.getAction().equals("com.htc.intent.action.QUICKBOOT_POWERON")) {
-            SharedPreferences appSharedPreferences = context.getSharedPreferences(context.getApplicationContext().getPackageName(), Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = appSharedPreferences.edit();
-            editor.remove("appHasRun");
-            editor.apply();
 
             SharedPreferences sharedPreferences = context.getSharedPreferences(RNPushNotificationHelper.PREFERENCES_KEY, Context.MODE_PRIVATE);
             Set<String> ids = sharedPreferences.getAll().keySet();
@@ -48,6 +44,7 @@ public class RNPushNotificationBootEventReceiver extends BroadcastReceiver {
                             Log.i("RNPushNotification", "RNPushNotificationBootEventReceiver: Showing notification for " +
                                     notificationAttributes.getId());
                             rnPushNotificationHelper.sendNotification(notificationAttributes.toBundle());
+                            rnPushNotificationHelper.scheduleNextNotificationIfRepeating(notificationAttributes.toBundle());
                         } else {
                             Log.i("RNPushNotification", "RNPushNotificationBootEventReceiver: Scheduling notification for " +
                                     notificationAttributes.getId());

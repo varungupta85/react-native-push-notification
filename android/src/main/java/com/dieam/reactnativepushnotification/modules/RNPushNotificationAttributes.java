@@ -29,12 +29,6 @@ public class RNPushNotificationAttributes {
     private String repeatType;
     private double repeatTime;
     private boolean ongoing;
-    private String alarmId;
-    private String alarmName;
-    private String type;
-    private String alarmType;
-    private String alarmAlert;
-    private String shortAlarmAlert;
 
     public RNPushNotificationAttributes() {
 
@@ -64,12 +58,6 @@ public class RNPushNotificationAttributes {
         bundle.putString("repeatType", repeatType);
         bundle.putDouble("repeatTime", repeatTime);
         bundle.putBoolean("ongoing", ongoing);
-        bundle.putString("alarmId", alarmId);
-        bundle.putString("alarmName", alarmName);
-        bundle.putString("type", type);
-        bundle.putString("alarmType", alarmType);
-        bundle.putString("alarmAlert", alarmAlert);
-        bundle.putString("shortAlarmAlert", shortAlarmAlert);
         return bundle;
     }
 
@@ -96,12 +84,6 @@ public class RNPushNotificationAttributes {
         repeatType = bundle.getString("repeatType");
         repeatTime = bundle.getDouble("repeatTime");
         ongoing = bundle.getBoolean("ongoing");
-        alarmId = bundle.getString("alarmId");
-        alarmName = bundle.getString("alarmName");
-        type = bundle.getString("type");
-        alarmType = bundle.getString("alarmType");
-        alarmAlert = bundle.getString("alarmAlert");
-        shortAlarmAlert = bundle.getString("shortAlarmAlert");
     }
 
     public JSONObject toJson() {
@@ -129,12 +111,6 @@ public class RNPushNotificationAttributes {
             jsonObject.put("repeatType", repeatType);
             jsonObject.put("repeatTime", repeatTime);
             jsonObject.put("ongoing", ongoing);
-            jsonObject.put("alarmId", alarmId);
-            jsonObject.put("alarmName", alarmName);
-            jsonObject.put("type", type);
-            jsonObject.put("alarmType", alarmType);
-            jsonObject.put("alarmAlert", alarmAlert);
-            jsonObject.put("shortAlarmAlert", shortAlarmAlert);
         } catch (JSONException e) {
             Log.e(RNPushNotification.LOG_TAG, "Exception while converting RNPushNotificationAttributes to " +
                     "JSON. Returning an empty object", e);
@@ -167,12 +143,6 @@ public class RNPushNotificationAttributes {
             repeatType = jsonObject.has("repeatType") ? jsonObject.getString("repeatType") : null;
             repeatTime = jsonObject.has("repeatTime") ? jsonObject.getDouble("repeatTime") : 0.0;
             ongoing = jsonObject.has("ongoing") ? jsonObject.getBoolean("ongoing") : false;
-            alarmId = jsonObject.has("alarmId") ? jsonObject.getString("alarmId") : null;
-            alarmName = jsonObject.has("alarmName") ? jsonObject.getString("alarmName") : null;
-            type = jsonObject.has("type") ? jsonObject.getString("type") : null;
-            alarmType = jsonObject.has("alarmType") ? jsonObject.getString("alarmType") : null;
-            alarmAlert = jsonObject.has("alarmAlert") ? jsonObject.getString("alarmAlert") : null;
-            shortAlarmAlert = jsonObject.has("shortAlarmAlert") ? jsonObject.getString("shortAlarmAlert") : null;
         } catch (JSONException e) {
             Log.e(RNPushNotification.LOG_TAG, "Exception while initializing RNPushNotificationAttributes from " +
                     "JSON. Some fields may not be set", e);
@@ -204,12 +174,6 @@ public class RNPushNotificationAttributes {
                 ", repeatType='" + repeatType + '\'' +
                 ", repeatTime=" + repeatTime +
                 ", ongoing=" + ongoing +
-                ", alarmId='" + alarmId + '\'' +
-                ", alarmName='" + alarmName + '\'' +
-                ", type='" + type + '\'' +
-                ", alarmType='" + alarmType + '\'' +
-                ", alarmAlert='" + alarmAlert + '\'' +
-                ", shortAlarmAlert='" + shortAlarmAlert + '\'' +
                 '}';
     }
 
@@ -299,29 +263,5 @@ public class RNPushNotificationAttributes {
 
     public boolean isOngoing() {
         return ongoing;
-    }
-
-    public String getAlarmId() {
-        return alarmId;
-    }
-
-    public String getAlarmName() {
-        return alarmName;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getAlarmType() {
-        return alarmType;
-    }
-
-    public String getAlarmAlert() {
-        return alarmAlert;
-    }
-
-    public String getShortAlarmAlert() {
-        return shortAlarmAlert;
     }
 }
